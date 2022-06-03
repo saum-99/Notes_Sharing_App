@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     username : {
         type:String,
-        required:true,
+        required:true
     },
     email: {
         type:String,
@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true   
    }
-
 })
 
 //creating collection

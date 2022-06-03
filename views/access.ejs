@@ -1,0 +1,40 @@
+<%- include('partials/header.ejs') %>
+
+  <main id="main" data-aos="fade-in">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs">
+      <div class="container">
+        <h2>Notes To Share</h2>
+       
+      </div>
+    </div><!-- End Breadcrumbs -->
+
+    <!-- ======= Courses Section ======= -->
+    <section id="courses" class="courses">
+      <div class="container" data-aos="fade-up">
+
+        <div class="container" data-aos="fade-up">
+
+            <div class="row">
+              <div class="col-lg-6 order-1 order-lg-2" data-aos="fade-left" data-aos-delay="100">
+                <img src="/img/about.jpg" class="img-fluid" alt="">
+              </div>
+              <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
+                <!--<h3>Voluptatem dignissimos provident quasi corporis voluptates sit assumenda.</h3> -->
+                <p class="fst-italic">
+                   <% for(var i=0; i<subjectaccess.length; i++) { %>
+                    <li><a href="<%= subjectaccess[i].link %>">link</a></li>       
+                <% } %>
+                </p>
+              </div>
+            </div>
+    
+          </div>
+      </div>
+    </section><!-- End Courses Section -->
+
+  </main><!-- End #main -->
+
+  
+  <%- include('partials/footer.ejs') %>

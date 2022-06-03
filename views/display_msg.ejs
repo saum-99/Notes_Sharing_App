@@ -1,0 +1,27 @@
+<%- include('partials/header.ejs') %>
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+
+    <div class="breadcrumbs" data-aos="fade-in">
+      <div class="container">
+        
+    </div>
+    
+    </div><!-- End Breadcrumbs -->
+    <div>
+        <p>Message: <%=message %></p>
+        <p>Subject: <%=subject %></p>
+    </div>
+    <div>
+        <form action="/approve" method="post">
+            <button name="approve" value="<%=message %>">Approve</button>
+        </form>
+    </div>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  
+  <%- include('partials/footer.ejs') %>
