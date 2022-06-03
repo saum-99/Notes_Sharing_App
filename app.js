@@ -18,8 +18,10 @@ const video = require("./models/videos");
 const joinUser = require("./models/joining_user");
 const addMentor = require("./models/add_mentor");
 
+
 // get config vars
 dotenv.config();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -221,20 +223,29 @@ app.get("/approve", async (req, res) => {
 });
 
 app.post("/approve", async (req, res) => {
-    
+    //console.log(req.body);
     const mentor = new joinUser({
-        name: req.body.approve.name,
-        email: req.body.approve.email,
-        subject: req.body.approve.subject,
-        message: req.body.approve.message
+        name: req.body.name,
+        email: req.body.email,
+        subject: req.body.subject,
+        message: req.body.message
     })
 
+    const id = req.body.id;
     const addMentor = await mentor.save();
+    
+    /*addMentor.deleteOne({id: id}, function (err, results) {
+        if(err)
+        console.log(err);
+        else
+        console.log(results);
+    });*/
+
+    
     res.redirect("/approve");
 })
 
 
 app.listen(8080, ()=>{
-
     console.log("Server started..")
 });
