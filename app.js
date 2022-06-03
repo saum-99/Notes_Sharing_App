@@ -109,7 +109,7 @@ app.get("/videos", (req, res) => {
 });
 
 app.post('/logIn', async(req, res) => {
-    try {
+    //try {
 
         const email = req.body.email;
         const password = req.body.password;
@@ -119,13 +119,15 @@ app.post('/logIn', async(req, res) => {
         //console.log(useremail);
           
         if(useremail.password === password){
-            const token = await jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.SECRET_KEY,{
+            var token = req.cookies.token;
+            if(!token){
+            token = await jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.SECRET_KEY,{
                 expiresIn: "5h",
             });
-            
+        }
             //doubt..........login krte m token naya bnega vo bhi save krna pdega kya??
 
-            console.log(JSON.stringify(token));
+            //console.log(JSON.stringify(token));
             return res.cookie("access_token", token, {
                 httpOnly: true
             }).status(201).render("index")
@@ -133,9 +135,10 @@ app.post('/logIn', async(req, res) => {
             res.send("invalid login details");
         }
 
-    }catch(err){
+    /*}catch(err){
         res.status(400).send(err);
     }
+    */
 });
 
 app.post("/sharenote", async (req, res) => {
