@@ -10,18 +10,24 @@
     </div>
     
     </div><!-- End Breadcrumbs -->
+    <% for(var i=0; i<mentors.length; i++) { %>
     <div>
-        <p>Message: <%=message %></p>
-        <p>Subject: <%=subject %></p>
+        <p>Message: <%=mentors[i].message %></p>
+        <p>Subject: <%=mentors[i].subject %></p>
     </div>
     <div>
-        <form action="/approve" method="post">
-            <button name="approve" value="<%=message %>">Approve</button>
-        </form>
+      <form method="post" action="/approve">
+        <button name="approve" onclick="approve()" value="<%=mentors[i] %>">Approve</button>
+      </form>
+                  
     </div>
+    <% } %>
 
   </main><!-- End #main -->
-
-  <!-- ======= Footer ======= -->
+<script>
+  function approve(){
+    mentors.isApproved = true;
+  }
+</script>
   
   <%- include('partials/footer.ejs') %>

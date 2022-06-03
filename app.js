@@ -16,6 +16,7 @@ const Register = require("./models/registers");
 const userNote = require("./models/userNotes");
 const video = require("./models/videos");
 const joinUser = require("./models/joining_user");
+const addMentor = require("./models/add_mentor");
 
 // get config vars
 dotenv.config();
@@ -34,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-    res.render("index")
+    res.render("index");
 });
 
 app.get("/about", (req, res) => {
@@ -45,8 +46,9 @@ app.get("/courses", (req, res) => {
     res.render("courses")
 })
 
-app.get("/contact", (req, res) => {
-    res.render("contact", {message: []});
+app.get("/contact", async (req, res) => {
+    const joinedMentor = await joinUser.find({});
+    res.render("contact", {joinedMentor : joinedMentor});
 })
 
 app.get("/signUp", (req, res) => {
@@ -86,7 +88,7 @@ app.post("/signUp", async(req, res)=>{
         /*return res.cookie("access_token", token, {
             httpOnly: true
         })*/
-        res.status(201).render("index"); 
+        res.status(201).redirect("login"); 
         
         }
         
@@ -123,19 +125,20 @@ app.post('/logIn', async(req, res) => {
             
             //doubt..........login krte m token naya bnega vo bhi save krna pdega kya??
 
+            console.log(JSON.stringify(token));
             return res.cookie("access_token", token, {
                 httpOnly: true
-            }).status(201).render("index"); 
+            }).status(201).render("index")
         } else{
             res.send("invalid login details");
         }
 
     }catch(err){
-        res.status(400).send("Invalid Login Details");
+        res.status(400).send(err);
     }
 });
 
-app.post("/sharenote", auth, async (req, res) => {
+app.post("/sharenote", async (req, res) => {
     //try{
         //console.log(req.body);
         const userNoteshare = new userNote({
@@ -194,29 +197,37 @@ app.post("/accessvideos", async(req, res) => {
     }
 })
 
-app.post("/join", (req, res) => {
-    const msg = req.body.message;
-    const subject = req.body.subject;
-    res.render("display_msg", {message : msg, subject: subject});
-});
-
-app.post("/approve", async (req, res) => {
-    console.log(req.body);
-    const joinuser = new joinUser({
+app.post("/join", async (req, res) => {
+    const Addmentor = new addMentor({
         name: req.body.name,
         email: req.body.email,
         subject: req.body.subject,
         message: req.body.message
+
     })
 
-    const joinedUser = await joinuser.save();
-
-    const msg = joinUser.find({});
-
+    const addedMentor = await Addmentor.save();
     
+    res.redirect("/");
+});
 
-    res.status(200).render("contact" ,{message : msg});
+app.get("/approve", async (req, res) => {
+    const mentors = await addMentor.find({});
+    res.render("display_msg", {mentors: mentors});
 
+});
+
+app.post("/approve", async (req, res) => {
+    
+    const mentor = new joinUser({
+        name: req.body.approve.name,
+        email: req.body.approve.email,
+        subject: req.body.approve.subject,
+        message: req.body.approve.message
+    })
+
+    const addMentor = await mentor.save();
+    res.redirect("/approve");
 })
 
 
