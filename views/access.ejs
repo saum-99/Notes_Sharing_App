@@ -11,7 +11,7 @@
     </div><!-- End Breadcrumbs -->
 
     <!-- ======= Courses Section ======= -->
-    <section id="courses" class="courses">
+    <section id="courses" class="courses" style="background-image: url('https://image.shutterstock.com/image-photo/yellow-background-blue-school-supplies-260nw-1132938011.jpg'); background-repeat: no-repeat; background-size: cover; background-size: 1400px 900px;">
       <div class="container" data-aos="fade-up">
 
         <div class="container" data-aos="fade-up">
@@ -24,7 +24,7 @@
                 <!--<h3>Voluptatem dignissimos provident quasi corporis voluptates sit assumenda.</h3> -->
                 <p class="fst-italic">
                    <% for(var i=0; i<subjectaccess.length; i++) { %>
-                    <li><a href="<%= subjectaccess[i].link %>">link</a></li>       
+                    <li><a href="<%= subjectaccess[i].link %>"><%= subjectaccess[i].subject %> link</a></li>       
                 <% } %>
                 </p>
               </div>

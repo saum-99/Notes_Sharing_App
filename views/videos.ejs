@@ -5,17 +5,21 @@
     <!-- ======= Breadcrumbs ======= -->
     <div class="breadcrumbs">
       <div class="container">
-        <h2>Videos To Share</h2>
+        <h2>Notes To Share</h2>
        
       </div>
     </div><!-- End Breadcrumbs -->
 
-    <!-- ======= Courses Section ======= -->
-    <section id="courses" class="courses">
-      <div class="container" data-aos="fade-up">
+
+    <!-- background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPGenRPu0lUYQZFA8Ydn81CxMH7H1uD_pyYpcSzXCqljYrSBL4mG8mKVHDIEXWB6fJQc4&usqp=CAU'); background-repeat: no-repeat;
+  background-size: cover;
+       ======= Courses Section ======= -->
+    <section id="courses" class="courses" style="background-image: url('https://i.pinimg.com/736x/65/84/68/6584680914d07bbdd9996417a7303dd8.jpg'); background-repeat: no-repeat; background-size: cover; background-size: 1400px 900px;">
+      <div class="container" data-aos="fade-up" >
 
         <div class="row" data-aos="zoom-in" data-aos-delay="100">
 
+          <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
             <div class="course-item">
               <div class="global-container">
                 <div class="card login-form">
@@ -26,7 +30,7 @@
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">Incorrect username or password.</div> -->
                     <form action="/accessvideos" method="post">
                       <!-- to error: add class "has-danger" -->
-                      
+                
                       <div class="form-group">
                         <label for="exampleInputEmail1">Subject</label>
                         <input type="text" name="subject" class="form-control form-control-sm" id="subject">
@@ -41,8 +45,52 @@
               </div>
               
             </div>
-        </div> <!-- End Course Item-->
-        
+          </div> <!-- End Course Item-->
+
+          <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
+            <div class="course-item">
+              <div class="global-container">
+                <div class="card login-form">
+                <div class="card-body">
+                  <h3 class="card-title text-center">Want to share the videos?</h3>
+                  <div class="card-text">
+                    <!--
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">Incorrect username or password.</div> -->
+                    <form action="/sharevideo" method="post">
+                      <!-- to error: add class "has-danger" -->
+                              <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="name" name="name" class="form-control form-control-sm" id="name" aria-describedby="emailHelp">
+                      </div>
+              
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" name="email" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp">
+                      </div>
+
+                      <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="subject" class="form-control form-control-sm" id="subject">
+                      </div>
+
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Video Link</label>
+                        <input type="text" name="link" class="form-control form-control-sm" id="link">
+                      </div>
+              
+                      <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                      
+                    </form>
+                  </div>
+                </div>
+              </div>
+              </div>
+              
+            </div>
+          </div> <!-- End Course Item-->
+         
+
+        </div>
 
       </div>
     </section><!-- End Courses Section -->

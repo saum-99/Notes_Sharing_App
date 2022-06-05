@@ -15,7 +15,7 @@ const Register = require("./models/registers");
 //const userSchema = require("./models/registers");
 const userNote = require("./models/userNotes");
 const video = require("./models/videos");
-const joinUser = require("./models/joining_user");
+//const joinUser = require("./models/joining_user");
 const addMentor = require("./models/add_mentor");
 
 
@@ -48,10 +48,7 @@ app.get("/courses", (req, res) => {
     res.render("courses")
 })
 
-app.get("/contact", async (req, res) => {
-    const joinedMentor = await joinUser.find({});
-    res.render("contact", {joinedMentor : joinedMentor});
-})
+
 
 app.get("/signUp", (req, res) => {
     res.render("signUp");
@@ -121,18 +118,23 @@ app.post('/logIn', async(req, res) => {
         //console.log(useremail);
           
         if(useremail.password === password){
-            var token = req.cookies.token;
-            if(!token){
-            token = await jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.SECRET_KEY,{
+            
+            console.log(req.cookies);
+            if(!req.cookies){
+            token = await jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.TOKEN_KEY,{
                 expiresIn: "5h",
             });
+
+            res.cookie("access_token", token, {
+                httpOnly: true
+            }).status(201).render("index");
+
         }
             //doubt..........login krte m token naya bnega vo bhi save krna pdega kya??
 
             //console.log(JSON.stringify(token));
-            return res.cookie("access_token", token, {
-                httpOnly: true
-            }).status(201).render("index")
+
+            res.render("index");
         } else{
             res.send("invalid login details");
         }
@@ -169,16 +171,17 @@ app.get("/join", (req, res) => {
 
 app.post("/sharevideo", async (req, res) => {
         const videoshare = new video({
+            email: req.body.email,
             subject: req.body.subject,
             link: req.body.link
         })
 
         const videoshared = await videoshare.save();
-        res.status(201).render("dummy");
+        res.status(201).render("videos");
 
 })
 
-app.post("/accessnote", auth, async (req, res) => {
+app.post("/accessnote", async (req, res) => {
     const subject = req.body.subject;
 
     if(subject){
@@ -204,6 +207,7 @@ app.post("/accessvideos", async(req, res) => {
 
 app.post("/join", async (req, res) => {
     const Addmentor = new addMentor({
+        img: req.body.img,
         name: req.body.name,
         email: req.body.email,
         subject: req.body.subject,
@@ -215,16 +219,22 @@ app.post("/join", async (req, res) => {
     
     res.redirect("/");
 });
+app.get("/contact", async (req, res) => {
+    const addmentor = await addMentor.find({});
+    res.render("contact", {addmentor : addmentor});
+})
 
 app.get("/approve", async (req, res) => {
-    const mentors = await addMentor.find({});
+    const mentors = await addMentor.find({isApproved: false});
     res.render("display_msg", {mentors: mentors});
 
 });
 
 app.post("/approve", async (req, res) => {
-    //console.log(req.body);
-    const mentor = new joinUser({
+    console.log(req.body);
+    await addMentor.findByIdAndUpdate(req.body.id, {isApproved: true});
+
+   /* const mentor = new joinUser({
         name: req.body.name,
         email: req.body.email,
         subject: req.body.subject,
@@ -233,6 +243,7 @@ app.post("/approve", async (req, res) => {
 
     const id = req.body.id;
     const addMentor = await mentor.save();
+    */
     
     /*addMentor.deleteOne({id: id}, function (err, results) {
         if(err)

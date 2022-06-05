@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const addSchema = new mongoose.Schema({
+    img:
+    {
+        type: String
+    },
     name : {
         type:String,
         required:true
@@ -18,7 +22,10 @@ const addSchema = new mongoose.Schema({
         type:String, 
         required:true     
    },
-   isApproved: false
+   isApproved: {
+       type: Boolean,
+       default:false
+   }
 })
 
 //creating collection
