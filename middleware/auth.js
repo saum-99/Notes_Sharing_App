@@ -11,12 +11,11 @@ const verifyToken = (req, res, next) => {
     return res.status(403).send("A token is required for authentication");
   }
   //try {
-    console.log(config.TOKEN_KEY);
-    console.log(token);
+    //console.log(config.TOKEN_KEY);
     
     const decoded = jwt.verify(token, config.TOKEN_KEY); //config.TOKEN_KEY
-    console.log(decoded);
-    req.user = decoded;
+    req.isLoggedIn = decoded;
+    console.log(req.isLoggedIn);
     
   /*} catch (err) {
       return res.send(err);

@@ -48,13 +48,13 @@ app.get("/courses", (req, res) => {
     res.render("courses")
 })
 
-
-
 app.get("/signUp", (req, res) => {
-    res.render("signUp");
+    if(typeof(req.isLoggedIn) == 'undefined'){
+        res.render('signUp');
+    }
+    console.log(req.isLoggedIn);
+    res.redirect('/');
 })
-
-
 
 app.post("/signUp", async(req, res)=>{
     //try{
@@ -100,8 +100,18 @@ app.post("/signUp", async(req, res)=>{
 })
 
 app.get("/logIn", (req, res) => {
-    res.render("login");
+    if(typeof(req.isLoggedIn) == 'undefined'){
+        res.render('logIn');
+    }
+    //console.log(req.isLoggedIn);
+    res.redirect('/');
 });
+
+app.get('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.redirect('/')
+})
+
 
 app.get("/videos", (req, res) => {
     res.render("videos");
@@ -116,7 +126,7 @@ app.post('/logIn', async(req, res) => {
         const useremail = await Register.findOne({ email: email});
         //const user_id = useremail.id;
         //console.log(useremail);
-          
+        
         if(useremail.password === password){
             
             console.log(req.cookies);
@@ -127,14 +137,10 @@ app.post('/logIn', async(req, res) => {
 
             res.cookie("access_token", token, {
                 httpOnly: true
-            }).status(201).render("index");
-
+            }).status(201).redirect("/");
         }
-            //doubt..........login krte m token naya bnega vo bhi save krna pdega kya??
-
-            //console.log(JSON.stringify(token));
-
-            res.render("index");
+        res.render("index");
+        
         } else{
             res.send("invalid login details");
         }
@@ -161,10 +167,6 @@ app.post("/sharenote", async (req, res) => {
     //} 
 });
 
-app.get("/dummy", (req, res) =>{
-    res.render("dummy")
-})
-
 app.get("/join", (req, res) => {
     res.render("join")
 });
@@ -181,7 +183,7 @@ app.post("/sharevideo", async (req, res) => {
 
 })
 
-app.post("/accessnote", async (req, res) => {
+app.post("/accessnote", auth, async (req, res) => {
     const subject = req.body.subject;
 
     if(subject){
