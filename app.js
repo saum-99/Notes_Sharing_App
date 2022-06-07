@@ -6,8 +6,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const auth = require("./middleware/auth");
 const cookieParser = require('cookie-parser');
+const emailValidator = require('email-validator');
+const nodemailer = require('nodemailer');
 
 
 require("./db/conn");
@@ -15,8 +16,10 @@ const Register = require("./models/registers");
 //const userSchema = require("./models/registers");
 const userNote = require("./models/userNotes");
 const video = require("./models/videos");
+const User = require("./models/User")
 //const joinUser = require("./models/joining_user");
 const addMentor = require("./models/add_mentor");
+const { getMaxListeners } = require('process');
 
 
 // get config vars
@@ -36,19 +39,96 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get("/", (req, res) => {
-    res.render("index");
+const randString = () => {
+    const len = 8;
+    let randStr = '';
+    for(let i=0; i<len; i++){
+        const ch = Math.floor((Math.random()*10) + 1);
+        randStr += ch
+    }
+    return randStr;
+}
+
+const sendMail = (email, uniqueString) => {
+    const transport = nodemailer.createTransport({
+        service: "Gmail" ,
+        auth: {
+            user: "saumya.18245@knit.ac.in",
+            pass: "29-Sa-19-Sh"
+        }
+    });
+
+    const options = {
+        from: "saumya.18245@knit.ac.in",
+        to: email,
+        subject: "Sending mail with nodejs",
+        html: `Press <a href=http://localhost:8080/verify/${uniqueString}> here </a> to verify your email. Thanks`
+    };
+    
+    transport.sendMail(options, function(err, info) {
+        if(err) {
+            console.log(err); 
+            return;
+        }
+        console.log("Message Sent");
+    });
+}
+
+app.get('/verify/:uniqueString', async(req, res) => {
+    const { uniqueString } = req.params;
+    console.log(uniqueString);
+    const user = await User.findOne({uniqueString: uniqueString})
+    if(user){
+        //console.log(user);
+        const registerUser = new Register({ 
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            confirmpassword: user.password
+
+        })
+
+        const registered = await registerUser.save();
+        res.status(201).render("login"); 
+    }
+    else{
+        res.json('User not found');
+    }
 });
 
-app.get("/about", (req, res) => {
-    res.render("about")
+//sendMail("saumyash299@gmail.com", randString());
+
+const verifyToken = (req, res, next) => {
+    if(typeof(req.headers.cookie) == 'undefined'){
+        next();
+    }
+    else{
+        //console.log(req.headers.cookie)
+        let hash = (req.headers.cookie.split('=')[1]);
+        //console.log(hash)
+        jwt.verify(hash, process.env.TOKEN_KEY, (err, decoded) => {
+            if(err){
+            }
+            else
+            req.isLoggedIn = decoded;
+        })
+        next();
+    }
+};
+
+app.get("/", verifyToken,(req, res) => {
+res.render("index", {user: req.isLoggedIn});
+});
+
+app.get("/about", verifyToken, (req, res) => {
+    res.render("about", {user: req.isLoggedIn})
 })
 
-app.get("/courses", (req, res) => {
-    res.render("courses")
+app.get("/courses", verifyToken, (req, res) => {
+    res.render("courses", {user: req.isLoggedIn})
 })
 
-app.get("/signUp", (req, res) => {
+app.get("/signUp", verifyToken, (req, res) => {
     if(typeof(req.isLoggedIn) == 'undefined'){
         res.render('signUp');
     }
@@ -62,32 +142,28 @@ app.post("/signUp", async(req, res)=>{
         const oldUser = await Register.findOne({email: email});
 
         if (oldUser) {
-          return res.status(409).send("User Already Exist. Please Login");
+          res.status(409).send("User Already Exist. Please Login");
         }
 
         const password = req.body.password;
         const cpassword = req.body.password1;
-        const user_id = req.body.id;
 
         if(password === cpassword){
-          const registerUser = new Register({ 
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password,
-            confirmpassword: req.body.password1
+            const uniqueString = randString();
+            console.log(uniqueString);
+            const user = new User({
+                username: req.body.username,
+                email: req.body.email,
+                password: req.body.password,
+                uniqueString: uniqueString
+            })
 
-        })
+         
 
-        /*const token = await jwt.sign({user_id}, process.env.SECRET_KEY,{
-            expiresIn: "5h",
-        }); */
+        const validated = await user.save();
 
-        const registered = await registerUser.save();
-        //console.log(registerUser);
-        /*return res.cookie("access_token", token, {
-            httpOnly: true
-        })*/
-        res.status(201).redirect("login"); 
+        sendMail(req.body.email, uniqueString);
+        res.render("error", {message: "Check mail to verify!"});
         
         }
         
@@ -99,11 +175,11 @@ app.post("/signUp", async(req, res)=>{
 
 })
 
-app.get("/logIn", (req, res) => {
+app.get("/logIn", verifyToken, (req, res) => {
     if(typeof(req.isLoggedIn) == 'undefined'){
         res.render('logIn');
     }
-    //console.log(req.isLoggedIn);
+    console.log(req.isLoggedIn);
     res.redirect('/');
 });
 
@@ -113,8 +189,8 @@ app.get('/logout', (req, res) => {
 })
 
 
-app.get("/videos", (req, res) => {
-    res.render("videos");
+app.get("/videos", verifyToken,(req, res) => {
+    res.render("videos", {user: req.isLoggedIn});
 });
 
 app.post('/logIn', async(req, res) => {
@@ -129,17 +205,12 @@ app.post('/logIn', async(req, res) => {
         
         if(useremail.password === password){
             
-            console.log(req.cookies);
-            if(!req.cookies){
-            token = await jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.TOKEN_KEY,{
+            jwt.sign({id: useremail.id, username: useremail.username, email: useremail.email}, process.env.TOKEN_KEY,{
                 expiresIn: "5h",
+            }, (err, token) => {
+                res.cookie('token', token, {httpOnly: true});
+                res.redirect('/')
             });
-
-            res.cookie("access_token", token, {
-                httpOnly: true
-            }).status(201).redirect("/");
-        }
-        res.render("index");
         
         } else{
             res.send("invalid login details");
@@ -167,8 +238,8 @@ app.post("/sharenote", async (req, res) => {
     //} 
 });
 
-app.get("/join", (req, res) => {
-    res.render("join")
+app.get("/join", verifyToken, (req, res) => {
+    res.render("join", {user: req.isLoggedIn})
 });
 
 app.post("/sharevideo", async (req, res) => {
@@ -183,24 +254,28 @@ app.post("/sharevideo", async (req, res) => {
 
 })
 
-app.post("/accessnote", auth, async (req, res) => {
+app.post("/accessnote", verifyToken, async (req, res) => {
+    if(typeof(req.isLoggedIn) == 'undefined'){
+        res.sendStatus(403);
+    }
+
     const subject = req.body.subject;
 
     if(subject){
         const subjectaccess = await userNote.find({ subject: subject});
-        res.render("access", {subjectaccess : subjectaccess});
+        res.render("access", {subjectaccess : subjectaccess, user: req.isLoggedIn});
     }
     else{
         res.send("No subject");
     }
 });
 
-app.post("/accessvideos", async(req, res) => {
+app.post("/accessvideos", verifyToken, async(req, res) => {
     const subject = req.body.subject;
 
     if(subject){
         const subjectaccess = await video.find({ subject: subject});
-        res.render("videoaccess", {subjectaccess : subjectaccess});
+        res.render("videoaccess", {subjectaccess : subjectaccess, user: req.isLoggedIn});
     }
     else{
         res.send("No subject");
@@ -221,9 +296,9 @@ app.post("/join", async (req, res) => {
     
     res.redirect("/");
 });
-app.get("/contact", async (req, res) => {
+app.get("/contact",verifyToken, async (req, res) => {
     const addmentor = await addMentor.find({});
-    res.render("contact", {addmentor : addmentor});
+    res.render("contact", {addmentor : addmentor, user: req.isLoggedIn});
 })
 
 app.get("/approve", async (req, res) => {
